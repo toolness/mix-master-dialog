@@ -98,15 +98,20 @@ $(window).ready(function() {
     // through Protovis, so I'll just do it with the SVG
     // output.
     sunburst.find("text").each(function() {
-      if ($(this).text()[0] == '<') {
+      var text = $(this).text();
+      text = $.trim(text);
+      if (text[0] == '<') {
         // I wish we could just use CSS classes here, but
         // addClass() doesn't seem to do anything. Silly
         // SVG and its strange world.
         $(this).attr("font-family", "Monaco, monospace");
         $(this).attr("font-size", "10pt");
+        $(this).text(text.substring(1, text.length-1));
       } else {
         $(this).attr("font-family", "Baskerville, serif");
         $(this).attr("font-size", "10pt");
+        // Let's remove the whitespace around it.
+        $(this).text(text);
       }
     });
   });
