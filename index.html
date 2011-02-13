@@ -55,7 +55,7 @@ function makeJSONofDOM(dom) {
       break;
     }
   }
-  return json;
+  return spaces.length == 0 ? 1 : json;
 }
 
 function makeSunburst(div, dom) {
