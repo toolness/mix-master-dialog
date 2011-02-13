@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>DOM Tutorial</title>
+<link rel="stylesheet" href="ex.css"/>
+<script src="jquery.min.js"></script>
+<script src="protovis-r3.2.js"></script>
+<style>
+body {
+  font-family: Baskerville;
+}
+
+h2 {
+  font-weight: normal;
+}
+
+#html textarea {
+  width: 90%;
+  height: 20em;
+  font-family: Monaco, monospace;
+  font-size: 10pt;
+  border: 1px dotted gray;
+  outline-width: 0;
+  padding: 0.5em;
+}
+
+div.column {
+  width: 300px;
+  float: left;
+}
+
+#html {
+  
+}
+</style>
+<script>
+var START_HTML = "<p>I had <em>nothing</em> to do with it.</p>";
+
+function makeJSONofDOM(dom) {
+  return {
+    p: {
+      "I had": 5,
+      em: {
+        "nothing": 7
+      },
+      "to do with it": 13
+    }
+  };
+}
+
+function makeSunburst(div, dom) {
+  var vis = new pv.Panel()
+                  .width(div.width())
+                  .height(div.width())
+                  .canvas(div.get(0));
+  
+  var partition = vis.add(pv.Layout.Partition.Fill)
+      .nodes(pv.dom(dom).root("body").nodes())
+      .size(function(d) { return d.nodeValue})
+      .order("descending")
+      .orient("radial");
+      
+  partition.node.add(pv.Wedge)
+      .fillStyle(pv.Colors.category19().by(function(d) {
+        return d.parentNode && d.parentNode.nodeName;
+      }))
+      .strokeStyle("#fff")
+      .lineWidth(.5);
+
+  partition.label.add(pv.Label)
+           .visible(function(d) {
+             return d.angle * d.outerRadius >= 6;
+           });
+           
+  vis.render();
+}
+
+$(window).ready(function() {
+  var textArea = $("#html textarea");
+  var rendering = $("#rendering div.content");
+  var sunburst = $("#sunburst div.content");
+
+  textArea.keyup(function() {
+    rendering.html(textArea.val());
+    makeSunburst(sunburst, makeJSONofDOM(rendering));
+  });
+  
+  if (textArea.val().length == 0)
+    textArea.val(START_HTML);
+  
+  textArea.trigger("keyup");
+});
+</script>
+<div id="html" class="column">
+  <h2>The HTML</h2 >
+  <textarea></textarea>
+</div>
+<div id="rendering" class="column">
+  <h2>How You See It</h2>
+  <div class="content"></div>
+</div>
+<div id="sunburst" class="column">
+  <h2>How Your Computer Sees It</h2>
+  <div class="content"></div>
+</div>
