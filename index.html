@@ -36,15 +36,26 @@ div.column {
 var START_HTML = "<p>I had <em>nothing</em> to do with it.</p>";
 
 function makeJSONofDOM(dom) {
-  return {
-    p: {
-      "I had": 5,
-      em: {
-        "nothing": 7
-      },
-      "to do with it": 13
+  var json = {};
+  var spaces = '';
+  dom = $(dom).get(0);
+  for (var i = 0; i < dom.childNodes.length; i++) {
+    var node = dom.childNodes[i];
+    switch (node.nodeType) {
+      case node.ELEMENT_NODE:
+      var name = '<' + node.nodeName.toLowerCase() + '>' + spaces;
+      spaces += ' ';
+      json[name] = makeJSONofDOM($(node));
+      break;
+
+      case node.TEXT_NODE:
+      var name = node.nodeValue + spaces;
+      spaces += ' ';
+      json[name] = node.nodeValue.length;
+      break;
     }
-  };
+  }
+  return json;
 }
 
 function makeSunburst(div, dom) {
@@ -54,7 +65,7 @@ function makeSunburst(div, dom) {
                   .canvas(div.get(0));
   
   var partition = vis.add(pv.Layout.Partition.Fill)
-      .nodes(pv.dom(dom).root("body").nodes())
+      .nodes(pv.dom(dom).root("<body>").nodes())
       .size(function(d) { return d.nodeValue})
       .order("descending")
       .orient("radial");
@@ -70,7 +81,7 @@ function makeSunburst(div, dom) {
            .visible(function(d) {
              return d.angle * d.outerRadius >= 6;
            });
-           
+
   vis.render();
 }
 
@@ -82,6 +93,22 @@ $(window).ready(function() {
   textArea.keyup(function() {
     rendering.html(textArea.val());
     makeSunburst(sunburst, makeJSONofDOM(rendering));
+
+    // I have no idea how to do this kind of thing
+    // through Protovis, so I'll just do it with the SVG
+    // output.
+    sunburst.find("text").each(function() {
+      if ($(this).text()[0] == '<') {
+        // I wish we could just use CSS classes here, but
+        // addClass() doesn't seem to do anything. Silly
+        // SVG and its strange world.
+        $(this).attr("font-family", "Monaco, monospace");
+        $(this).attr("font-size", "10pt");
+      } else {
+        $(this).attr("font-family", "Baskerville, serif");
+        $(this).attr("font-size", "10pt");
+      }
+    });
   });
   
   if (textArea.val().length == 0)
