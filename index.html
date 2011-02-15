@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <title>DOM Tutorial</title>
-<link rel="stylesheet" href="ex.css"/>
 <script src="jquery.min.js"></script>
 <script src="protovis-r3.2.js"></script>
+<script src="ace/ace.js"></script>
+<script src="ace/mode-html.js"></script>
+<script src="ace/theme-eclipse.js"></script>
 <style>
 body {
   font-family: Baskerville;
@@ -13,19 +15,35 @@ h2 {
   font-weight: normal;
 }
 
-#html textarea {
-  width: 90%;
-  height: 20em;
-  font-family: Monaco, monospace;
-  font-size: 10pt;
-  border: 1px dotted gray;
-  outline-width: 0;
-  padding: 0.5em;
-}
-
 div.column {
   width: 300px;
   float: left;
+}
+
+#editor-container {
+  position: relative;
+  width: 280px;
+  height: 280px;
+  border: 1px dotted gray;
+}
+
+#editor { 
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 280px;
+  height: 280px;
+  margin: 0;
+}
+
+/* Hide the horizontal scrollbar of the editor. */
+.ace_scroller {
+  overflow: hidden;
+}
+
+/* Hide the vertical scrollbar of the editor. */
+.ace_sb {
+  display: none;
 }
 </style>
 <script>
@@ -81,15 +99,34 @@ function makeSunburst(div, dom) {
   vis.render();
 }
 
+function setupEditor(onChange) {
+  function onChangeWrapper() {
+    var text = session.getDocument().getValue();
+    onChange(text);
+  }
+
+  var editor = ace.edit("editor");
+  editor.setTheme("ace/theme/eclipse");
+  var HTMLMode = require("ace/mode/html").Mode;
+  var session = editor.getSession();
+  session.setMode(new HTMLMode());
+  editor.renderer.setShowGutter(false);
+  editor.setHighlightActiveLine(false);
+  session.setUseWrapMode(true);
+  session.setWrapLimitRange(36, 36);
+  session.getDocument().on("change", onChangeWrapper);
+  onChangeWrapper();
+}
+
 $(window).ready(function() {
-  var textArea = $("#html textarea");
   var rendering = $("#rendering div.content");
   var sunburst = $("#sunburst div.content");
 
-  textArea.keyup(function() {
-    rendering.html(textArea.val());
-    makeSunburst(sunburst, makeJSONofDOM(rendering));
+  $("pre").text(START_HTML);
 
+  setupEditor(function onChange(text) {
+    rendering.html(text);
+    makeSunburst(sunburst, makeJSONofDOM(rendering));
     // I have no idea how to do this kind of thing
     // through Protovis, so I'll just do it with the SVG
     // output.
@@ -111,16 +148,11 @@ $(window).ready(function() {
       }
     });
   });
-  
-  if (textArea.val().length == 0)
-    textArea.val(START_HTML);
-  
-  textArea.trigger("keyup");
 });
 </script>
 <div id="html" class="column">
-  <h2>The HTML</h2 >
-  <textarea></textarea>
+  <h2>The HTML</h2>
+  <div id="editor-container"><pre id="editor"></pre></div>
 </div>
 <div id="rendering" class="column">
   <h2>How You See It</h2>
