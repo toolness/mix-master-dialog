@@ -54,7 +54,7 @@ div.column {
 var START_HTML = "<p>I had <em>nothing</em> to do with it.</p>";
 
 function makeProtovisDOMfromDOM(dom, name) {
-  var pvNode = new pv.Dom.Node();
+  var pvNode = new pv.Dom.Node($(dom).text().length + 1);
   pvNode.nodeName = name;
   var childNode;
 
@@ -64,15 +64,9 @@ function makeProtovisDOMfromDOM(dom, name) {
     var node = dom.childNodes[i];
     switch (node.nodeType) {
       case node.ELEMENT_NODE:
-      var name = '<' + node.nodeName.toLowerCase() + '>';
+      var name = node.nodeName.toLowerCase();
       childNode = makeProtovisDOMfromDOM($(node), name);
       childNode.realDOMNode = node;
-      pvNode.appendChild(childNode);
-      break;
-
-      case node.TEXT_NODE:
-      childNode = new pv.Dom.Node(node.nodeValue.length);
-      childNode.nodeName = node.nodeValue;
       pvNode.appendChild(childNode);
       break;
     }
@@ -142,26 +136,16 @@ $(window).ready(function() {
 
   setupEditor(function onChange(text) {
     rendering.html(text);
-    makeSunburst(sunburst, makeProtovisDOMfromDOM(rendering, '<body>'));
+    makeSunburst(sunburst, makeProtovisDOMfromDOM(rendering, 'body'));
     // I have no idea how to do this kind of thing
     // through Protovis, so I'll just do it with the SVG
     // output.
     sunburst.find("text").each(function() {
-      var text = $(this).text();
-      text = $.trim(text);
-      if (text[0] == '<') {
-        // I wish we could just use CSS classes here, but
-        // addClass() doesn't seem to do anything. Silly
-        // SVG and its strange world.
-        $(this).attr("font-family", "Monaco, monospace");
-        $(this).attr("font-size", "10pt");
-        $(this).text(text.substring(1, text.length-1));
-      } else {
-        $(this).attr("font-family", "Baskerville, serif");
-        $(this).attr("font-size", "10pt");
-        // Let's remove the whitespace around it.
-        $(this).text(text);
-      }
+      // I wish we could just use CSS classes here, but
+      // addClass() doesn't seem to do anything. Silly
+      // SVG and its strange world.
+      $(this).attr("font-family", "Monaco, monospace");
+      $(this).attr("font-size", "10pt");
     });
   });
 });
