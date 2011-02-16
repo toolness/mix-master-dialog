@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <title>DOM Tutorial</title>
+<link rel="stylesheet" href="webxray/static-files/webxray.css">
 <script src="jquery.min.js"></script>
 <script src="protovis-r3.2.js"></script>
 <script src="ace/ace.js"></script>
 <script src="ace/mode-html.js"></script>
 <script src="ace/theme-eclipse.js"></script>
+<script src="webxray/src/utils.js"></script>
+<script src="webxray/src/tag-colors.js"></script>
 <style>
 body {
   font-family: Baskerville;
@@ -74,6 +77,31 @@ function makeProtovisDOMfromDOM(dom, name) {
   return pvNode;
 }
 
+function createHighlighter() {
+  var overlay = null;
+  
+  function clearOverlay() {
+    if (overlay) {
+      overlay.remove();
+      overlay = null;
+    }
+  }
+
+  return {
+    over: function(d) {
+      clearOverlay();
+      if (d.realDOMNode) {
+        overlay = $(d.realDOMNode).overlayWithTagColor();
+        overlay.addClass("webxray-overlay-visible");
+      }
+    },
+
+    out: function(d) {
+      clearOverlay();
+    }
+  };
+}
+
 function makeSunburst(div, dom) {
   var vis = new pv.Panel()
                   .width(div.width())
@@ -94,23 +122,19 @@ function makeSunburst(div, dom) {
       .height(spacing * 2)
       .right(spacing)
       .strokeStyle(null);
-  
-  function highlight(d) {
-    if (d.realDOMNode)
-      $(d.realDOMNode).addClass("highlight");
-  }
 
-  function unhighlight(d) {
-    if (d.realDOMNode)
-      $(d.realDOMNode).removeClass("highlight");
-  }
+  var highlighter = createHighlighter();
 
   node.anchor("left").add(pv.Dot)
-      .strokeStyle("#1f77b4")
-      .fillStyle("#aec7e8")
+      .strokeStyle(function(d) {
+        return $.colorForTag(d.nodeName);
+      })
+      .fillStyle(function(d) {
+        return $.makeRGBA($.colorForTag(d.nodeName), 0.5);
+      })
       .title(function(d) { return d.nodeName; })
-      .event("mouseover", highlight)
-      .event("mouseout", unhighlight)
+      .event("mouseover", highlighter.over)
+      .event("mouseout", highlighter.out)
       .anchor("right").add(pv.Label)
       .font("9pt Monaco, monospace")
       .text(function(d) { return d.nodeName; });
