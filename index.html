@@ -9,6 +9,7 @@
 <script src="ace/theme-eclipse.js"></script>
 <script src="webxray/src/utils.js"></script>
 <script src="webxray/src/tag-colors.js"></script>
+<script src="webxray/src/hud-overlay.js"></script>
 <style>
 body {
   font-family: Baskerville;
@@ -80,6 +81,10 @@ var START_HTML =
   "<p>I had <em>nothing</em> to do with it.</p>\n\n" +
   "<p>And you are a goose.</p>";
 
+START_HUD_HTML =
+  "<span>Play around with the HTML code and move your mouse " +
+  "over the DOM diagram to learn how Web pages work.</span>";
+
 function makeProtovisDOMfromDOM(dom, name) {
   var pvNode = new pv.Dom.Node();
   pvNode.nodeName = name;
@@ -101,7 +106,7 @@ function makeProtovisDOMfromDOM(dom, name) {
   return pvNode;
 }
 
-function createHighlighter() {
+function createHighlighter(hud) {
   var overlay = null;
   
   function clearOverlay() {
@@ -109,14 +114,30 @@ function createHighlighter() {
       overlay.remove();
       overlay = null;
     }
+    hud.onFocusChange({element: null, ancestor: null});
   }
 
   return {
     over: function(d) {
       clearOverlay();
       if (d.realDOMNode) {
-        overlay = $(d.realDOMNode).overlayWithTagColor();
+        var node = d.realDOMNode;
+        overlay = $(node).overlayWithTagColor();
         overlay.addClass("webxray-overlay-visible");
+
+        var parent = node.parentNode;
+
+        // TODO: This is a dumb hack to make the root node seem as
+        // simple as we tell the user it is. But we should actually just
+        // structure the DOM simply instead of intervening here.
+        if ($(node).is("div.content"))
+          node = document.createElement("div");
+        if ($(parent).is("div.content"))
+          parent = document.createElement("div");
+        if ($(parent).is("div.column"))
+          parent = null;
+
+        hud.onFocusChange({element: node, ancestor: parent});
       }
     },
 
@@ -126,7 +147,7 @@ function createHighlighter() {
   };
 }
 
-function makeSunburst(div, dom) {
+function makeSunburst(div, dom, hud) {
   var vis = new pv.Panel()
                   .width(div.width())
                   .height(div.width())
@@ -147,7 +168,7 @@ function makeSunburst(div, dom) {
       .right(spacing)
       .strokeStyle(null);
 
-  var highlighter = createHighlighter();
+  var highlighter = createHighlighter(hud);
 
   node.anchor("left").add(pv.Dot)
       .strokeStyle(function(d) {
@@ -156,7 +177,6 @@ function makeSunburst(div, dom) {
       .fillStyle(function(d) {
         return $.makeRGBA($.colorForTag(d.nodeName), 0.5);
       })
-      .title(function(d) { return d.nodeName; })
       .event("mouseover", highlighter.over)
       .event("mouseout", highlighter.out)
       .anchor("right").add(pv.Label)
@@ -189,11 +209,14 @@ $(window).ready(function() {
   var rendering = $("#rendering div.content");
   var sunburst = $("#sunburst div.content");
 
+  var hud = jQuery.hudOverlay({defaultContent: START_HUD_HTML});
+  $(document.body).append(hud.overlay);
+
   $("pre#editor").text(START_HTML);
 
   setupEditor(function onChange(text) {
     rendering.html(text);
-    makeSunburst(sunburst, makeProtovisDOMfromDOM(rendering, 'div'));
+    makeSunburst(sunburst, makeProtovisDOMfromDOM(rendering, 'div'), hud);
   });
 });
 </script>
