@@ -52,6 +52,15 @@ div.column {
 .highlight {
   background-color: yellow;
 }
+
+pre {
+  font-family: Monaco, monospace;
+  font-size: 9pt;
+}
+
+pre span.tag {
+  color: purple;
+}
 </style>
 <script>
 var START_HTML = "<p>I had <em>nothing</em> to do with it.</p>";
@@ -165,7 +174,7 @@ $(window).ready(function() {
   var rendering = $("#rendering div.content");
   var sunburst = $("#sunburst div.content");
 
-  $("pre").text(START_HTML);
+  $("pre#editor").text(START_HTML);
 
   setupEditor(function onChange(text) {
     rendering.html(text);
@@ -175,7 +184,9 @@ $(window).ready(function() {
 </script>
 <div id="html" class="column">
   <h2>The HTML</h2>
+  <pre>&lt;<span class="tag">div</span>&gt;</pre>
   <div id="editor-container"><pre id="editor"></pre></div>
+  <pre>&lt;/<span class="tag">div</span>&gt;</pre>
 </div>
 <div id="rendering" class="column">
   <h2>How You See It</h2>
