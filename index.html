@@ -71,10 +71,6 @@ pre {
 pre span.tag {
   color: purple;
 }
-
-svg {
-  padding-top: 1em;
-}
 </style>
 <script>
 var START_HTML = 
@@ -153,7 +149,7 @@ function makeSunburst(div, dom, hud) {
                   .height(div.width())
                   .canvas(div.get(0));
   
-  var spacing = 8;
+  var spacing = 16;
   
   var tree = vis.add(pv.Layout.Indent)
       .nodes(dom.nodes())
@@ -179,6 +175,8 @@ function makeSunburst(div, dom, hud) {
       })
       .event("mouseover", highlighter.over)
       .event("mouseout", highlighter.out)
+      .event("click", highlighter.over)
+      .size(200)
       .anchor("right").add(pv.Label)
       .font("9pt Monaco, monospace")
       .text(function(d) { return d.nodeName; });
