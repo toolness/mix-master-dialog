@@ -49,27 +49,29 @@ div.column {
 <script>
 var START_HTML = "<p>I had <em>nothing</em> to do with it.</p>";
 
-function makeJSONofDOM(dom) {
-  var json = {};
-  var spaces = '';
+function makeProtovisDOMfromDOM(dom, name) {
+  var pvNode = new pv.Dom.Node();
+  pvNode.nodeName = name;
+  var childNode;
+
   dom = $(dom).get(0);
   for (var i = 0; i < dom.childNodes.length; i++) {
     var node = dom.childNodes[i];
     switch (node.nodeType) {
       case node.ELEMENT_NODE:
-      var name = '<' + node.nodeName.toLowerCase() + '>' + spaces;
-      spaces += ' ';
-      json[name] = makeJSONofDOM($(node));
+      var name = '<' + node.nodeName.toLowerCase() + '>';
+      childNode = makeProtovisDOMfromDOM($(node), name);
+      pvNode.appendChild(childNode);
       break;
 
       case node.TEXT_NODE:
-      var name = node.nodeValue + spaces;
-      spaces += ' ';
-      json[name] = node.nodeValue.length;
+      childNode = new pv.Dom.Node(node.nodeValue.length);
+      childNode.nodeName = node.nodeValue;
+      pvNode.appendChild(childNode);
       break;
     }
   }
-  return spaces.length == 0 ? 1 : json;
+  return pvNode;
 }
 
 function makeSunburst(div, dom) {
@@ -79,7 +81,7 @@ function makeSunburst(div, dom) {
                   .canvas(div.get(0));
   
   var partition = vis.add(pv.Layout.Partition.Fill)
-      .nodes(pv.dom(dom).root("<body>").nodes())
+      .nodes(dom.nodes())
       .size(function(d) { return d.nodeValue})
       .order("descending")
       .orient("radial");
@@ -126,7 +128,7 @@ $(window).ready(function() {
 
   setupEditor(function onChange(text) {
     rendering.html(text);
-    makeSunburst(sunburst, makeJSONofDOM(rendering));
+    makeSunburst(sunburst, makeProtovisDOMfromDOM(rendering, '<body>'));
     // I have no idea how to do this kind of thing
     // through Protovis, so I'll just do it with the SVG
     // output.
