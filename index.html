@@ -16,11 +16,20 @@ body {
 
 h2 {
   font-weight: normal;
+  margin-top: 0.5em;
+  margin-bottom: 0.1em;
 }
 
 div.column {
   width: 300px;
   float: left;
+  margin-left: 1em;
+}
+
+div.desc {
+  font-size: 9pt;
+  color: gray;
+  height: 4em;
 }
 
 #editor-container {
@@ -60,6 +69,10 @@ pre {
 
 pre span.tag {
   color: purple;
+}
+
+svg {
+  padding-top: 1em;
 }
 </style>
 <script>
@@ -184,15 +197,18 @@ $(window).ready(function() {
 </script>
 <div id="html" class="column">
   <h2>HTML</h2>
+  <div class="desc">This is what every page on the Web comes down to: plain-text source code that anyone can read.</div>
   <pre>&lt;<span class="tag">div</span>&gt;</pre>
   <div id="editor-container"><pre id="editor"></pre></div>
   <pre>&lt;/<span class="tag">div</span>&gt;</pre>
 </div>
 <div id="sunburst" class="column">
   <h2>Document Object Model</h2>
+  <div class="desc">A Web browser reads the HTML and generates a tree-like structure that represents the content of the document, how it's styled, and how it behaves.</div>
   <div class="content"></div>
 </div>
 <div id="rendering" class="column">
-  <h2>What You See</h2>
+  <h2>The Final Product</h2>
+  <div class="desc">All the parts of a Web browser work together to create an experience that can be viewed, heard, and interacted with.</div>
   <div class="content"></div>
 </div>
