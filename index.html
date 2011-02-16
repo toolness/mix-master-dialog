@@ -45,6 +45,10 @@ div.column {
 .ace_sb {
   display: none;
 }
+
+.highlight {
+  background-color: yellow;
+}
 </style>
 <script>
 var START_HTML = "<p>I had <em>nothing</em> to do with it.</p>";
@@ -55,12 +59,14 @@ function makeProtovisDOMfromDOM(dom, name) {
   var childNode;
 
   dom = $(dom).get(0);
+  pvNode.realDOMNode = dom;
   for (var i = 0; i < dom.childNodes.length; i++) {
     var node = dom.childNodes[i];
     switch (node.nodeType) {
       case node.ELEMENT_NODE:
       var name = '<' + node.nodeName.toLowerCase() + '>';
       childNode = makeProtovisDOMfromDOM($(node), name);
+      childNode.realDOMNode = node;
       pvNode.appendChild(childNode);
       break;
 
@@ -91,7 +97,15 @@ function makeSunburst(div, dom) {
         return d.parentNode && d.parentNode.nodeName;
       }))
       .strokeStyle("#fff")
-      .lineWidth(.5);
+      .lineWidth(.5)
+      .event('mouseover', function(d) {
+        if (d.realDOMNode)
+          $(d.realDOMNode).addClass("highlight");
+      })
+      .event('mouseout', function(d) {
+        if (d.realDOMNode)
+          $(d.realDOMNode).removeClass("highlight");
+      });
 
   partition.label.add(pv.Label)
            .visible(function(d) {
