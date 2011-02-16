@@ -54,7 +54,7 @@ div.column {
 var START_HTML = "<p>I had <em>nothing</em> to do with it.</p>";
 
 function makeProtovisDOMfromDOM(dom, name) {
-  var pvNode = new pv.Dom.Node($(dom).text().length + 1);
+  var pvNode = new pv.Dom.Node();
   pvNode.nodeName = name;
   var childNode;
 
@@ -80,31 +80,40 @@ function makeSunburst(div, dom) {
                   .height(div.width())
                   .canvas(div.get(0));
   
-  var partition = vis.add(pv.Layout.Partition.Fill)
+  var spacing = 8;
+  
+  var tree = vis.add(pv.Layout.Indent)
       .nodes(dom.nodes())
-      .size(function(d) { return d.nodeValue})
-      .order("descending")
-      .orient("radial");
-      
-  partition.node.add(pv.Wedge)
-      .fillStyle(pv.Colors.category19().by(function(d) {
-        return d.parentNode && d.parentNode.nodeName;
-      }))
-      .strokeStyle("#fff")
-      .lineWidth(.5)
-      .event('mouseover', function(d) {
-        if (d.realDOMNode)
-          $(d.realDOMNode).addClass("highlight");
-      })
-      .event('mouseout', function(d) {
-        if (d.realDOMNode)
-          $(d.realDOMNode).removeClass("highlight");
-      });
+      .depth(spacing * 2)
+      .breadth(spacing * 2);
 
-  partition.label.add(pv.Label)
-           .visible(function(d) {
-             return d.angle * d.outerRadius >= 6;
-           });
+  tree.link.add(pv.Line);
+  
+  var node = tree.node.add(pv.Panel)
+      .top(function (n) { return n.y - spacing; })
+      .height(spacing * 2)
+      .right(spacing)
+      .strokeStyle(null);
+  
+  function highlight(d) {
+    if (d.realDOMNode)
+      $(d.realDOMNode).addClass("highlight");
+  }
+
+  function unhighlight(d) {
+    if (d.realDOMNode)
+      $(d.realDOMNode).removeClass("highlight");
+  }
+
+  node.anchor("left").add(pv.Dot)
+      .strokeStyle("#1f77b4")
+      .fillStyle("#aec7e8")
+      .title(function(d) { return d.nodeName; })
+      .event("mouseover", highlight)
+      .event("mouseout", unhighlight)
+      .anchor("right").add(pv.Label)
+      .font("9pt Monaco, monospace")
+      .text(function(d) { return d.nodeName; });
 
   vis.render();
 }
@@ -136,17 +145,7 @@ $(window).ready(function() {
 
   setupEditor(function onChange(text) {
     rendering.html(text);
-    makeSunburst(sunburst, makeProtovisDOMfromDOM(rendering, 'body'));
-    // I have no idea how to do this kind of thing
-    // through Protovis, so I'll just do it with the SVG
-    // output.
-    sunburst.find("text").each(function() {
-      // I wish we could just use CSS classes here, but
-      // addClass() doesn't seem to do anything. Silly
-      // SVG and its strange world.
-      $(this).attr("font-family", "Monaco, monospace");
-      $(this).attr("font-size", "10pt");
-    });
+    makeSunburst(sunburst, makeProtovisDOMfromDOM(rendering, 'div'));
   });
 });
 </script>
