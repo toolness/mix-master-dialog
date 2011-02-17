@@ -147,7 +147,7 @@ function createHighlighter(hud) {
   };
 }
 
-function makeSunburst(div, dom, hud) {
+function makeSkeleton(div, dom, hud) {
   var vis = new pv.Panel()
                   .width(div.width())
                   .height(div.width())
@@ -216,7 +216,7 @@ function setupEditor(onChange) {
 
 $(window).ready(function() {
   var rendering = $("#rendering div.content");
-  var sunburst = $("#sunburst div.content");
+  var skeleton = $("#skeleton div.content");
 
   var hud = jQuery.hudOverlay({defaultContent: START_HUD_HTML});
   $(document.body).append(hud.overlay);
@@ -225,7 +225,7 @@ $(window).ready(function() {
 
   setupEditor(function onChange(text) {
     rendering.html(text);
-    makeSunburst(sunburst, makeProtovisDOMfromDOM(rendering, 'div'), hud);
+    makeSkeleton(skeleton, makeProtovisDOMfromDOM(rendering, 'div'), hud);
   });
 });
 </script>
@@ -237,7 +237,7 @@ $(window).ready(function() {
   <div id="editor-container"><pre id="editor"></pre></div>
   <pre>&lt;/<span class="tag">div</span>&gt;</pre>
 </div>
-<div id="sunburst" class="column">
+<div id="skeleton" class="column">
   <h2>The Skeleton</h2>
   <div class="desc">A Web browser reads the HTML blueprint and builds a hierarchic structure that represents its understanding of the document.<br><br>This structure is like the skeleton of the page, and it's sometimes called the <em>Document Object Model</em>, or DOM.</div>
   <div class="content"></div>
