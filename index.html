@@ -194,6 +194,13 @@ function setupEditor(onChange) {
     onChange(text);
   }
 
+  // The default Mac keybindings map Command-L to 'go to line #',
+  // which both isn't needed for this page and also overrides
+  // the browser-default behavior of selecting the address bar,
+  // so we'll disable it.
+  var mac = require("ace/keyboard/keybinding/default_mac");
+  delete mac.bindings.gotoline;
+
   var editor = ace.edit("editor");
   editor.setTheme("ace/theme/eclipse");
   var HTMLMode = require("ace/mode/html").Mode;
