@@ -114,36 +114,31 @@ function makeProtovisDOMfromDOM(dom, name) {
 }
 
 function createHighlighter(hud, focusedOverlay) {
-  function clearOverlay() {
-    focusedOverlay.unfocus();
-    hud.onFocusChange({element: null, ancestor: null});
-  }
-
   return {
     over: function(d) {
-      clearOverlay();
-      if (d.realDOMNode) {
-        var node = d.realDOMNode;
-        focusedOverlay.set(node);
+      var node = d.realDOMNode;
+      if (focusedOverlay.element == node)
+        return;
+      focusedOverlay.set(node);
 
-        var parent = node.parentNode;
+      var parent = node.parentNode;
 
-        // TODO: This is a dumb hack to make the root node seem as
-        // simple as we tell the user it is. But we should actually just
-        // structure the DOM simply instead of intervening here.
-        if ($(node).is("div.content"))
-          node = document.createElement("div");
-        if ($(parent).is("div.content"))
-          parent = document.createElement("div");
-        if ($(parent).is("div.column"))
-          parent = null;
+      // TODO: This is a dumb hack to make the root node seem as
+      // simple as we tell the user it is. But we should actually just
+      // structure the DOM simply instead of intervening here.
+      if ($(node).is("div.content"))
+        node = document.createElement("div");
+      if ($(parent).is("div.content"))
+        parent = document.createElement("div");
+      if ($(parent).is("div.column"))
+        parent = null;
 
-        hud.onFocusChange({element: node, ancestor: parent});
-      }
+      hud.onFocusChange({element: node, ancestor: parent});
     },
 
     out: function(d) {
-      clearOverlay();
+      focusedOverlay.unfocus();
+      hud.onFocusChange({element: null, ancestor: null});
     }
   };
 }
@@ -178,6 +173,7 @@ function makeSkeleton(div, dom, highlighter) {
       })
       .event("mouseover", highlighter.over)
       .event("mouseout", highlighter.out)
+      // Click handler is for touch-based devices.
       .event("click", highlighter.over)
       .size(200)
       .anchor("right").add(pv.Label)
