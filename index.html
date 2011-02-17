@@ -15,7 +15,7 @@ body {
   font-family: Baskerville;
 }
 
-h2 {
+h1, h2 {
   font-weight: normal;
   margin-top: 0.5em;
   margin-bottom: 0.1em;
@@ -30,7 +30,11 @@ div.column {
 div.desc {
   font-size: 9pt;
   color: gray;
-  height: 6em;
+  height: 9em;
+}
+
+#header {
+  margin-left: 1em;
 }
 
 #editor-container {
@@ -218,20 +222,21 @@ $(window).ready(function() {
   });
 });
 </script>
+<div id="header"><h1>How Do Web Pages Work?</h1></div>
 <div id="html" class="column">
-  <h2>HTML</h2>
-  <div class="desc">This is what every page on the Web comes from: plain-text source code that anyone can read.</div>
+  <h2>The Blueprint</h2>
+  <div class="desc">This is what every page on the Web comes from: plain-text source code that anyone can read. It's written in a simple language called the <em>Hypertext Markup Language</em>, or HTML.<br><br>It's like a blueprint.</div>
   <pre>&lt;<span class="tag">div</span>&gt;</pre>
   <div id="editor-container"><pre id="editor"></pre></div>
   <pre>&lt;/<span class="tag">div</span>&gt;</pre>
 </div>
 <div id="sunburst" class="column">
-  <h2>Document Object Model</h2>
-  <div class="desc">A Web browser reads the HTML and generates a tree-like structure that represents the content of the document, how it's styled, and how it behaves.<br><br>Understand the DOM and you master the Web.</div>
+  <h2>The Skeleton</h2>
+  <div class="desc">A Web browser reads the HTML blueprint and builds a hierarchic structure that represents its understanding of the document.<br><br>This structure is like the skeleton of the page, and it's sometimes called the <em>Document Object Model</em>, or DOM.</div>
   <div class="content"></div>
 </div>
 <div id="rendering" class="column">
   <h2>The Final Product</h2>
-  <div class="desc">All the parts of a Web browser work together to create a page that can be seen, heard, and even interacted with.<br><br>It's like magic ink.</div>
+  <div class="desc">Code written in a programming language called <em>JavaScript</em> serves as the page's muscles and nervous system; styling information written in a language called <em>Cascading Style Sheets</em>, or CSS, makes up its skin and clothing.<br><br>The result is a page that can be seen, heard, and even interacted with. It's like magic ink.</div>
   <div class="content"></div>
 </div>
