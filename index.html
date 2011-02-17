@@ -9,6 +9,8 @@
 <script src="ace/theme-eclipse.js"></script>
 <script src="webxray/src/utils.js"></script>
 <script src="webxray/src/tag-colors.js"></script>
+<script src="webxray/src/event-emitter.js"></script>
+<script src="webxray/src/focused-overlay.js"></script>
 <script src="webxray/src/hud-overlay.js"></script>
 <style>
 body {
@@ -51,6 +53,11 @@ div.desc {
   width: 280px;
   height: 280px;
   margin: 0;
+}
+
+#rendering div.content {
+  font-family: Helvetica, sans-serif;
+  font-size: 14pt;
 }
 
 /* Hide the horizontal scrollbar of the editor. */
@@ -106,14 +113,9 @@ function makeProtovisDOMfromDOM(dom, name) {
   return pvNode;
 }
 
-function createHighlighter(hud) {
-  var overlay = null;
-  
+function createHighlighter(hud, focusedOverlay) {
   function clearOverlay() {
-    if (overlay) {
-      overlay.remove();
-      overlay = null;
-    }
+    focusedOverlay.unfocus();
     hud.onFocusChange({element: null, ancestor: null});
   }
 
@@ -122,8 +124,7 @@ function createHighlighter(hud) {
       clearOverlay();
       if (d.realDOMNode) {
         var node = d.realDOMNode;
-        overlay = $(node).overlayWithTagColor();
-        overlay.addClass("webxray-overlay-visible");
+        focusedOverlay.set(node);
 
         var parent = node.parentNode;
 
@@ -147,7 +148,7 @@ function createHighlighter(hud) {
   };
 }
 
-function makeSkeleton(div, dom, hud) {
+function makeSkeleton(div, dom, highlighter) {
   var vis = new pv.Panel()
                   .width(div.width())
                   .height(div.width())
@@ -167,8 +168,6 @@ function makeSkeleton(div, dom, hud) {
       .height(spacing * 2)
       .right(spacing)
       .strokeStyle(null);
-
-  var highlighter = createHighlighter(hud);
 
   node.anchor("left").add(pv.Dot)
       .strokeStyle(function(d) {
@@ -219,13 +218,17 @@ $(window).ready(function() {
   var skeleton = $("#skeleton div.content");
 
   var hud = jQuery.hudOverlay({defaultContent: START_HUD_HTML});
+  var focusedOverlay = jQuery.focusedOverlay();
+  var highlighter = createHighlighter(hud, focusedOverlay);
+
   $(document.body).append(hud.overlay);
 
   $("pre#editor").text(START_HTML);
 
   setupEditor(function onChange(text) {
     rendering.html(text);
-    makeSkeleton(skeleton, makeProtovisDOMfromDOM(rendering, 'div'), hud);
+    makeSkeleton(skeleton, makeProtovisDOMfromDOM(rendering, 'div'),
+                 highlighter);
   });
 });
 </script>
