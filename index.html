@@ -15,6 +15,7 @@
 <style>
 body {
   font-family: Baskerville, Georgia, serif;
+  background: white;
 }
 
 h1, h2 {
@@ -81,6 +82,23 @@ pre {
 
 pre span.tag {
   color: purple;
+}
+
+#buttons {
+  display: none;
+}
+
+.button {
+  float: right;
+  padding: 0.5em;
+  background: #f0f0f0;
+  margin: 0.25em;
+  cursor: pointer;
+}
+
+div.button:hover {
+  background: black;
+  color: white;
 }
 </style>
 <script>
@@ -213,21 +231,86 @@ $(window).ready(function() {
   var rendering = $("#rendering div.content");
   var skeleton = $("#skeleton div.content");
 
-  var hud = jQuery.hudOverlay({defaultContent: START_HUD_HTML});
-  var focusedOverlay = jQuery.focusedOverlay();
-  var highlighter = createHighlighter(hud, focusedOverlay);
+  var defaultContent = START_HUD_HTML;
+  var startHTML = START_HTML;
+  var isDialog = (window.location.hash == "#dialog");
+  var isInIframe = !(top === self);
 
-  $(document.body).append(hud.overlay);
+  function start() {
+    var hud = jQuery.hudOverlay({defaultContent: defaultContent});
+    var focusedOverlay = jQuery.focusedOverlay();
+    var highlighter = createHighlighter(hud, focusedOverlay);
 
-  $("pre#editor").text(START_HTML);
+    $(document.body).append(hud.overlay);
 
-  setupEditor(function onChange(text) {
-    rendering.html(text);
-    makeSkeleton(skeleton, makeProtovisDOMfromDOM(rendering, 'div'),
-                 highlighter);
-  });
+    $("pre#editor").text(startHTML);
+
+    setupEditor(function onChange(text) {
+      rendering.html(text);
+      makeSkeleton(skeleton, makeProtovisDOMfromDOM(rendering, 'div'),
+                   highlighter);
+    });
+  }
+
+  if (isDialog) {
+    var sendMessage;
+    var responseSent = false;
+    var isStarted = false;
+    
+    $(".desc").hide();
+    $("#buttons").show();
+    function onMessage(data) {
+      if (isStarted)
+        return;
+      isStarted = true;
+      $("#header h1").text(data.title);
+      var editorHeight = $(window).height() / 2;
+      $("#editor").height(editorHeight);
+      $("#editor-container").height(editorHeight);      
+      defaultContent = data.instructions;
+      startHTML = data.startHTML;
+      start();
+    }
+    if (isInIframe) {
+      window.addEventListener("message", function(event) {
+        if (event.data && event.data.length && event.data[0] == '{') {
+          onMessage(JSON.parse(event.data));
+        }
+      }, false);
+      sendMessage = function sendMessageViaPostMessage(data) {
+        window.parent.postMessage(JSON.stringify(data), "*");
+      }
+    } else {
+      onMessage({
+        title: "Here is a title.",
+        instructions: "Here are instructions.",
+        startHTML: "<p>Here is starting HTML.</p>"
+      });
+      sendMessage = function fakeSendMessage(data) {
+        alert("Sending the following to parent window: " +
+              JSON.stringify(data));
+      }
+    }
+    $("#nevermind.button").click(function() {
+      if (!responseSent) {
+        sendMessage({msg: 'nevermind'});
+        responseSent = true;
+      }
+    });
+    $("#ok.button").click(function() {
+      if (!responseSent) {
+        sendMessage({msg: 'ok', endHTML: $("pre#editor").text()});
+        responseSent = true;
+      }
+    });
+  } else
+    start();
 });
 </script>
+<div id="buttons">
+  <div class="button" id="nevermind">Nevermind</div>
+  <div class="button" id="ok">Ok</div>
+</div>
 <div id="header"><h1>How Do Web Pages Work?</h1></div>
 <div id="html" class="column">
   <h2>The Blueprint</h2>
