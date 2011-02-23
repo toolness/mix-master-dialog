@@ -255,6 +255,9 @@ $(window).ready(function() {
     
     $(".desc").hide();
     $("#buttons").show();
+    $("#html > h2").text("HTML Source Code");
+    $("#skeleton > h2").text("What Your Browser Sees");
+    $("#rendering > h2").text("What You See");
     function onMessage(data) {
       if (isStarted)
         return;
