@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>Mix Master Unit Tests</title>
+<link rel="stylesheet" href="qunit.css">
+
+<script src="../jquery.min.js"></script>
+<script src="../protovis-r3.2.js"></script>
+<script src="../ace/ace.js"></script>
+<script src="../ace/mode-html.js"></script>
+<script src="../ace/theme-eclipse.js"></script>
+<script src="../webxray/src/utils.js"></script>
+<script src="../webxray/src/tag-colors.js"></script>
+<script src="../webxray/src/event-emitter.js"></script>
+<script src="../webxray/src/focused-overlay.js"></script>
+<script src="../webxray/src/hud-overlay.js"></script>
+<script src="../mix-master.js"></script>
+
+<script src="qunit.js"></script>
+
+<!-- This is for TestSwarm only. -->
+<script src="/js/inject.js"></script>
+
+<script>
+module("mix-master");
+
+test("setupEditor", function() {
+  var editorObj = jQuery.setupEditor("test-editor-div",
+                                     function onChange() {} );
+  equals(editorObj.getText(), "Monkeys are cool!");
+});
+
+test("setupEditor-onchange", function() {
+  var editorObj = jQuery.setupEditor("test-editor-div", 
+    function onChange(text) {
+      equals (text, "Donkeys are cool!");
+    });
+  throw new Error("TODO: Finish this!");
+});
+</script>
+
+<h1 id="qunit-header">Mix Master Unit Tests</h1>
+<h2 id="qunit-banner"></h2>
+<div id="qunit-testrunner-toolbar"></div>
+<h2 id="qunit-userAgent"></h2>
+<ol id="qunit-tests"></ol>
+<div id="qunit-fixture">
+  <div id="test-editor-div">Monkeys are cool!</div>
+</div>
