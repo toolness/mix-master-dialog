@@ -25,18 +25,23 @@ module("mix-master-dialog");
 
 test("setupEditor triggers onChange on init", function() {
   var wasCalled = false;
-  var editorObj = jQuery.setupEditor("test-editor-div", function onChange(t) {
-    equals(t, "Monkeys are cool!", "onChange must receive initial contents");
-    wasCalled = true;
-  });
+  var textContent = "Monkeys are cool!";
+  var editorObj = jQuery.setupEditor("test-editor-div", textContent, 
+    function onChange(t) {
+      equals(t, textContent, 
+             "onChange must receive initial contents");
+      wasCalled = true;
+    });
+
   ok(wasCalled, "onChange handler must be triggered");
 });
 
 test("setupEditor initializes default content", function() {
-  var editorObj = jQuery.setupEditor("test-editor-div",
-                                     function onChange() {
+  var textContent = "Sheep are cool!";
+  var editorObj = jQuery.setupEditor("test-editor-div", textContent,
+                                      function onChange() {
                                      });
-  equals(editorObj.getText(), "Monkeys are cool!");
+  equals(editorObj.getText(), textContent);
 });
 
 
@@ -48,5 +53,5 @@ test("setupEditor initializes default content", function() {
 <h2 id="qunit-userAgent"></h2>
 <ol id="qunit-tests"></ol>
 <div id="qunit-fixture">
-  <div id="test-editor-div">Monkeys are cool!</div>
+  <div id="test-editor-div"></div>
 </div>

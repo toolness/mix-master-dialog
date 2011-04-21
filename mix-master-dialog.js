@@ -100,7 +100,7 @@
     vis.render();
   }
 
-  jQuery.setupEditor = function (idToEdit, onChange) {
+  jQuery.setupEditor = function (idToEdit, textContent, onChange) {
     function onChangeWrapper() {
       var text = getText();
       onChange(text);
@@ -109,6 +109,8 @@
     function getText() {
       return session.getDocument().getValue();
     }
+    
+    $("#" + idToEdit).text(textContent);
     
     // The default Mac keybindings map Command-L to 'go to line #',
     // which both isn't needed for this page and also overrides
@@ -147,9 +149,7 @@
 
       $(document.body).append(hud.overlay);
 
-      $("pre#editor").text(startHTML);
-
-      jQuery.setupEditor("editor", function onChange(text) {
+      jQuery.setupEditor("editor", startHTML, function onChange(text) {
         rendering.html(text);
         makeSkeleton(skeleton, makeProtovisDOMfromDOM(rendering, 'div'),
                      highlighter);
