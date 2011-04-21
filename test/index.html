@@ -23,19 +23,23 @@
 <script>
 module("mix-master-dialog");
 
-test("setupEditor", function() {
+test("setupEditor triggers onChange on init", function() {
+  var wasCalled = false;
+  var editorObj = jQuery.setupEditor("test-editor-div", function onChange(t) {
+    equals(t, "Monkeys are cool!", "onChange must receive initial contents");
+    wasCalled = true;
+  });
+  ok(wasCalled, "onChange handler must be triggered");
+});
+
+test("setupEditor initializes default content", function() {
   var editorObj = jQuery.setupEditor("test-editor-div",
-                                     function onChange() {} );
+                                     function onChange() {
+                                     });
   equals(editorObj.getText(), "Monkeys are cool!");
 });
 
-test("setupEditor-onchange", function() {
-  var editorObj = jQuery.setupEditor("test-editor-div", 
-    function onChange(text) {
-      equals (text, "Donkeys are cool!");
-    });
-  throw new Error("TODO: Finish this!");
-});
+
 </script>
 
 <h1 id="qunit-header">Mix Master Dialog Unit Tests</h1>
