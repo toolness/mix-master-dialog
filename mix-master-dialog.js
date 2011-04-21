@@ -138,7 +138,6 @@
 
     var defaultContent = START_HUD_HTML;
     var startHTML = START_HTML;
-    var isDialog = (window.location.hash == "#dialog");
     var isInIframe = !(top === self);
 
     function start() {
@@ -157,66 +156,60 @@
       });
     }
 
-    if (isDialog) {
-      var sendMessage;
-      var responseSent = false;
-      var isStarted = false;
-    
-      $(".desc").hide();
-      $("#buttons").show();
-      $("#html > h2").text("HTML Source Code");
-      $("#skeleton > h2").text("What Your Browser Sees");
-      $("#rendering > h2").text("What You See");
-      function onMessage(data) {
-        if (isStarted)
-          return;
-        isStarted = true;
-        var base = document.createElement('base');
-        base.setAttribute('href', data.baseURI);
-        $(document.head).append(base);
-        $("#header h1").text(data.title);
-        var editorHeight = $(window).height() / 2;
-        $("#editor").height(editorHeight);
-        $("#editor-container").height(editorHeight);      
-        defaultContent = data.instructions;
-        startHTML = data.startHTML;
-        start();
-      }
-      if (isInIframe) {
-        window.addEventListener("message", function(event) {
-          if (event.data && event.data.length && event.data[0] == '{') {
-            onMessage(JSON.parse(event.data));
-          }
-        }, false);
-        sendMessage = function sendMessageViaPostMessage(data) {
-          window.parent.postMessage(JSON.stringify(data), "*");
-        }
-      } else {
-        onMessage({
-          title: "Here is a title.",
-          instructions: "Here are instructions.",
-          startHTML: "<p>Here is starting HTML.</p>",
-          baseURI: "http://www.mozilla.org/"
-        });
-        sendMessage = function fakeSendMessage(data) {
-          alert("Sending the following to parent window: " +
-                JSON.stringify(data));
-        }
-      }
-      $("#nevermind.button").click(function() {
-        if (!responseSent) {
-          sendMessage({msg: 'nevermind'});
-          responseSent = true;
-        }
-      });
-      $("#ok.button").click(function() {
-        if (!responseSent) {
-          sendMessage({msg: 'ok', endHTML: $("pre#editor").text()});
-          responseSent = true;
-        }
-      });
-    } else
+    var sendMessage;
+    var responseSent = false;
+    var isStarted = false;
+
+    function onMessage(data) {
+      if (isStarted)
+        return;
+      isStarted = true;
+      var base = document.createElement('base');
+      base.setAttribute('href', data.baseURI);
+      $(document.head).append(base);
+      $("#header h1").text(data.title);
+      var editorHeight = $(window).height() / 2;
+      $("#editor").height(editorHeight);
+      $("#editor-container").height(editorHeight);      
+      defaultContent = data.instructions;
+      startHTML = data.startHTML;
       start();
+    }
+    if (isInIframe) {
+      window.addEventListener("message", function(event) {
+        if (event.data && event.data.length && event.data[0] == '{') {
+          onMessage(JSON.parse(event.data));
+        }
+      }, false);
+      sendMessage = function sendMessageViaPostMessage(data) {
+        window.parent.postMessage(JSON.stringify(data), "*");
+      }
+    } else {
+      // We're developing this app in a window, so trigger the
+      // dialog API calls with dummy data.
+      onMessage({
+        title: "Here is a title.",
+        instructions: "Here are instructions.",
+        startHTML: "<p>Here is starting HTML.</p>",
+        baseURI: "http://www.mozilla.org/"
+      });
+      sendMessage = function fakeSendMessage(data) {
+        alert("Sending the following to parent window: " +
+              JSON.stringify(data));
+      }
+    }
+    $("#nevermind.button").click(function() {
+      if (!responseSent) {
+        sendMessage({msg: 'nevermind'});
+        responseSent = true;
+      }
+    });
+    $("#ok.button").click(function() {
+      if (!responseSent) {
+        sendMessage({msg: 'ok', endHTML: $("pre#editor").text()});
+        responseSent = true;
+      }
+    });
   }
 
 })(jQuery);

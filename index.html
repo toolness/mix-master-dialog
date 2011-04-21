@@ -101,25 +101,22 @@ div.button:hover {
   color: white;
 }
 </style>
-<div id="buttons" style="display: none;">
+<div id="buttons">
   <div class="button" id="nevermind">Nevermind</div>
   <div class="button" id="ok">Ok</div>
 </div>
-<div id="header"><h1>How Do Web Pages Work?</h1></div>
+<div id="header"><h1><!-- This is filled by the dialog caller. --></h1></div>
 <div id="html" class="column">
-  <h2>The Blueprint</h2>
-  <div class="desc">This is what every page on the Web comes from: plain-text source code that anyone can read. It's written in a simple language called the <em>Hypertext Markup Language</em>, or HTML.<br><br>It's like a blueprint.</div>
+  <h2>HTML Source Code</h2>
   <pre>&lt;<span class="tag">div</span>&gt;</pre>
   <div id="editor-container"><pre id="editor"></pre></div>
   <pre>&lt;/<span class="tag">div</span>&gt;</pre>
 </div>
 <div id="skeleton" class="column">
-  <h2>The Skeleton</h2>
-  <div class="desc">A Web browser reads the HTML blueprint and builds a hierarchic structure that represents its understanding of the document.<br><br>This structure is like the skeleton of the page, and it's sometimes called the <em>Document Object Model</em>, or DOM.</div>
+  <h2>What Your Browser Sees</h2>
   <div class="content"></div>
 </div>
 <div id="rendering" class="column">
-  <h2>The Final Product</h2>
-  <div class="desc">Optionally, code written in a language called <em>JavaScript</em> serves as the page's muscles and nervous system; presentational information written in <em>Cascading Style Sheets</em>, or CSS, makes up its skin and clothing.<br><br>The result is a page that can be seen, heard, and even interacted with. It's like magic ink.</div>
+  <h2>What You See</h2>
   <div class="content"></div>
 </div>
