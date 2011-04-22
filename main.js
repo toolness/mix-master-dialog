@@ -16,18 +16,21 @@
         this.editor = null;
 
         options.skeleton.empty();
-        options.rendering.empty();
+        this.rendering.destroy();
+        this.rendering = null;
       }
     };
     var highlighter = jQuery.createHighlighter(ui.hud, ui.focusedOverlay);
 
     $(document.body).append(ui.hud.overlay);
 
+    ui.rendering = new jQuery.HTMLRendering(options.rendering);
+    
     ui.editor = jQuery.setupEditor(
       options.idToEdit,
       options.defaultEditorContent,
       function onChange(text) {
-        options.rendering.html(text);
+        ui.rendering.setHTML(text);
         jQuery.makeSkeleton(
           options.skeleton,
           jQuery.makeProtovisDOMfromDOM(options.rendering, 'div'),
