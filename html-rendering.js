@@ -5,7 +5,7 @@
     var self = this;
     
     self.setHTML = function(html) {
-      div.html(html);
+      div.html(html);      
     };
 
     self.destroy = function() {};    
