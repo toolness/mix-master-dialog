@@ -34,6 +34,7 @@ test("setupEditor triggers onChange on init", function() {
     });
 
   ok(wasCalled, "onChange handler must be triggered");
+  editorObj.destroy();
 });
 
 test("setupEditor initializes default content", function() {
@@ -42,8 +43,22 @@ test("setupEditor initializes default content", function() {
                                       function onChange() {
                                      });
   equals(editorObj.getText(), textContent);
+  editorObj.destroy();
 });
 
+test("setupUI renders changes in editor to HTML", function () {
+  var rendering = $("#test-rendering");
+  var startHTML = "<p>this is <em>html</em>.</p>";
+  var ui = jQuery.setupUI({
+    rendering: rendering,
+    skeleton: $("#test-skeleton"),
+    defaultHudContent: "boop",
+    defaultEditorContent: startHTML,
+    idToEdit: "test-editor-div"
+  });
+  equals(rendering.html(), startHTML);
+  ui.destroy();
+});
 
 </script>
 
@@ -54,4 +69,6 @@ test("setupEditor initializes default content", function() {
 <ol id="qunit-tests"></ol>
 <div id="qunit-fixture">
   <div id="test-editor-div"></div>
+  <div id="test-rendering"></div>
+  <div id="test-skeleton"></div>  
 </div>

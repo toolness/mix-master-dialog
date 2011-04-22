@@ -1,14 +1,6 @@
 (function (jQuery) {
   var $ = jQuery;
 
-  var START_HTML = 
-    "<p>I had <em>nothing</em> to do with it.</p>\n\n" +
-    "<p>And you are a goose.</p>";
-
-  var START_HUD_HTML =
-    "<span>Play around with the HTML code and move your mouse " +
-    "over the DOM diagram to learn how Web pages work.</span>";
-
   function makeProtovisDOMfromDOM(dom, name) {
     var pvNode = new pv.Dom.Node();
     pvNode.nodeName = name;
@@ -131,30 +123,53 @@
     session.getDocument().on("change", onChangeWrapper);
     onChangeWrapper();
     
-    return ( { getText: getText } );
+    return {
+      getText: getText,
+      destroy: function destroy() {
+        // TODO: How do we destroy an ACE editor? For now,
+        // we will just wipe out the DOM element it's in.
+        $("#" + idToEdit).empty();
+      }
+    };
   }
 
-  jQuery.setupMixMaster = function() {
-    var rendering = $("#rendering div.content");
-    var skeleton = $("#skeleton div.content");
+  jQuery.setupUI = function(options) {
+    var ui = {
+      hud: jQuery.hudOverlay({
+        defaultContent: options.defaultHudContent
+      }),
+      focusedOverlay: jQuery.focusedOverlay(),
+      destroy: function() {
+        this.focusedOverlay.destroy();
+        this.focusedOverlay = null;
+        this.hud.destroy();
+        this.hud = null;
+        this.editor.destroy();
+        this.editor = null;
 
-    var defaultContent = START_HUD_HTML;
-    var startHTML = START_HTML;
-    var isInIframe = !(top === self);
+        options.skeleton.empty();
+        options.rendering.empty();
+      }
+    };
+    var highlighter = createHighlighter(ui.hud, ui.focusedOverlay);
 
-    function start() {
-      var hud = jQuery.hudOverlay({defaultContent: defaultContent});
-      var focusedOverlay = jQuery.focusedOverlay();
-      var highlighter = createHighlighter(hud, focusedOverlay);
+    $(document.body).append(ui.hud.overlay);
 
-      $(document.body).append(hud.overlay);
-
-      jQuery.setupEditor("editor", startHTML, function onChange(text) {
-        rendering.html(text);
-        makeSkeleton(skeleton, makeProtovisDOMfromDOM(rendering, 'div'),
+    ui.editor = jQuery.setupEditor(
+      options.idToEdit,
+      options.defaultEditorContent,
+      function onChange(text) {
+        options.rendering.html(text);
+        makeSkeleton(options.skeleton,
+                     makeProtovisDOMfromDOM(options.rendering, 'div'),
                      highlighter);
       });
-    }
+
+    return ui;
+  };
+  
+  jQuery.setupMixMaster = function() {
+    var isInIframe = !(top === self);
 
     var sendMessage;
     var responseSent = false;
@@ -171,9 +186,13 @@
       var editorHeight = $(window).height() / 2;
       $("#editor").height(editorHeight);
       $("#editor-container").height(editorHeight);      
-      defaultContent = data.instructions;
-      startHTML = data.startHTML;
-      start();
+      var ui = jQuery.setupUI({
+        rendering: $("#rendering div.content"),
+        skeleton: $("#skeleton div.content"),
+        defaultHudContent: data.instructions,
+        defaultEditorContent: data.startHTML,
+        idToEdit: "editor"
+      });
     }
     if (isInIframe) {
       window.addEventListener("message", function(event) {
