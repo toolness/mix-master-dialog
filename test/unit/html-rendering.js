@@ -10,3 +10,15 @@ test("setHTML actually renders HTML", function () {
 
   htmlRendering.destroy();
 });
+
+
+test("destroy clears out old content from the div", function () {
+  var div = $("#test-rendering");
+  
+  var htmlRendering = new jQuery.HTMLRendering(div);
+  htmlRendering.setHTML("Monkeys are cool");
+  htmlRendering.destroy();
+
+  equals(div.html(), "");
+  
+});
