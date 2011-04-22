@@ -75,6 +75,21 @@ test("setupUI causes HUD to initialize", function () {
   ui.destroy();
 });
 
+test("setupUI causes the SVG skeleton element to appear", function () {
+  var rendering = $("#test-rendering");
+  var startHTML = "<p>this is <em>html</em>.</p>";
+  var ui = jQuery.setupUI({
+    rendering: rendering,
+    skeleton: $("#test-skeleton"),
+    defaultHudContent: "boop",
+    defaultEditorContent: startHTML,
+    idToEdit: "test-editor-div"
+  });
+  equals($("#test-skeleton svg").length, 1);
+  
+  ui.destroy();
+});
+
 </script>
 
 <h1 id="qunit-header">Mix Master Dialog Unit Tests</h1>
