@@ -26,7 +26,7 @@
 
     ui.rendering = new jQuery.HTMLRendering(options.rendering);
     
-    ui.editor = jQuery.setupEditor(
+    ui.editor = new jQuery.Editor(
       options.idToEdit,
       options.defaultEditorContent,
       function onChange(text) {
