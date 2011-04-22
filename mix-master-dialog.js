@@ -1,7 +1,7 @@
 (function (jQuery) {
   var $ = jQuery;
 
-  function makeProtovisDOMfromDOM(dom, name) {
+  jQuery.makeProtovisDOMfromDOM = function makeProtovisDOMfromDOM(dom, name) {
     var pvNode = new pv.Dom.Node();
     pvNode.nodeName = name;
     var childNode;
@@ -22,7 +22,7 @@
     return pvNode;
   }
 
-  function createHighlighter(hud, focusedOverlay) {
+  jQuery.createHighlighter = function createHighlighter(hud, focusedOverlay) {
     return {
       over: function(d) {
         var node = d.realDOMNode;
@@ -52,7 +52,7 @@
     };
   }
 
-  function makeSkeleton(div, dom, highlighter) {
+  jQuery.makeSkeleton = function makeSkeleton(div, dom, highlighter) {
     var vis = new pv.Panel()
                     .width(div.width())
                     .height(div.width())
@@ -91,144 +91,4 @@
 
     vis.render();
   }
-
-  jQuery.setupEditor = function (idToEdit, textContent, onChange) {
-    function onChangeWrapper() {
-      var text = getText();
-      onChange(text);
-    }
-
-    function getText() {
-      return session.getDocument().getValue();
-    }
-    
-    $("#" + idToEdit).text(textContent);
-    
-    // The default Mac keybindings map Command-L to 'go to line #',
-    // which both isn't needed for this page and also overrides
-    // the browser-default behavior of selecting the address bar,
-    // so we'll disable it.
-    var mac = require("ace/keyboard/keybinding/default_mac");
-    delete mac.bindings.gotoline;
-
-    var editor = ace.edit(idToEdit);
-    editor.setTheme("ace/theme/eclipse");
-    var HTMLMode = require("ace/mode/html").Mode;
-    var session = editor.getSession();
-    session.setMode(new HTMLMode());
-    editor.renderer.setShowGutter(false);
-    editor.setHighlightActiveLine(false);
-    session.setUseWrapMode(true);
-    session.setWrapLimitRange(36, 36);
-    session.getDocument().on("change", onChangeWrapper);
-    onChangeWrapper();
-    
-    return {
-      getText: getText,
-      destroy: function destroy() {
-        // TODO: How do we destroy an ACE editor? For now,
-        // we will just wipe out the DOM element it's in.
-        $("#" + idToEdit).empty();
-      }
-    };
-  }
-
-  jQuery.setupUI = function(options) {
-    var ui = {
-      hud: jQuery.hudOverlay({
-        defaultContent: options.defaultHudContent
-      }),
-      focusedOverlay: jQuery.focusedOverlay(),
-      destroy: function() {
-        this.focusedOverlay.destroy();
-        this.focusedOverlay = null;
-        this.hud.destroy();
-        this.hud = null;
-        this.editor.destroy();
-        this.editor = null;
-
-        options.skeleton.empty();
-        options.rendering.empty();
-      }
-    };
-    var highlighter = createHighlighter(ui.hud, ui.focusedOverlay);
-
-    $(document.body).append(ui.hud.overlay);
-
-    ui.editor = jQuery.setupEditor(
-      options.idToEdit,
-      options.defaultEditorContent,
-      function onChange(text) {
-        options.rendering.html(text);
-        makeSkeleton(options.skeleton,
-                     makeProtovisDOMfromDOM(options.rendering, 'div'),
-                     highlighter);
-      });
-
-    return ui;
-  };
-  
-  jQuery.setupMixMaster = function() {
-    var isInIframe = !(top === self);
-
-    var sendMessage;
-    var responseSent = false;
-    var isStarted = false;
-
-    function onMessage(data) {
-      if (isStarted)
-        return;
-      isStarted = true;
-      var base = document.createElement('base');
-      base.setAttribute('href', data.baseURI);
-      $(document.head).append(base);
-      $("#header h1").text(data.title);
-      var editorHeight = $(window).height() / 2;
-      $("#editor").height(editorHeight);
-      $("#editor-container").height(editorHeight);      
-      var ui = jQuery.setupUI({
-        rendering: $("#rendering div.content"),
-        skeleton: $("#skeleton div.content"),
-        defaultHudContent: data.instructions,
-        defaultEditorContent: data.startHTML,
-        idToEdit: "editor"
-      });
-    }
-    if (isInIframe) {
-      window.addEventListener("message", function(event) {
-        if (event.data && event.data.length && event.data[0] == '{') {
-          onMessage(JSON.parse(event.data));
-        }
-      }, false);
-      sendMessage = function sendMessageViaPostMessage(data) {
-        window.parent.postMessage(JSON.stringify(data), "*");
-      }
-    } else {
-      // We're developing this app in a window, so trigger the
-      // dialog API calls with dummy data.
-      onMessage({
-        title: "Here is a title.",
-        instructions: "Here are instructions.",
-        startHTML: "<p>Here is starting HTML.</p>",
-        baseURI: "http://www.mozilla.org/"
-      });
-      sendMessage = function fakeSendMessage(data) {
-        alert("Sending the following to parent window: " +
-              JSON.stringify(data));
-      }
-    }
-    $("#nevermind.button").click(function() {
-      if (!responseSent) {
-        sendMessage({msg: 'nevermind'});
-        responseSent = true;
-      }
-    });
-    $("#ok.button").click(function() {
-      if (!responseSent) {
-        sendMessage({msg: 'ok', endHTML: $("pre#editor").text()});
-        responseSent = true;
-      }
-    });
-  }
-
 })(jQuery);

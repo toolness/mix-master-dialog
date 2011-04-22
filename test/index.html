@@ -14,83 +14,18 @@
 <script src="../webxray/src/focused-overlay.js"></script>
 <script src="../webxray/src/hud-overlay.js"></script>
 <script src="../mix-master-dialog.js"></script>
+<script src="../editor.js"></script>
+<script src="../html-rendering.js"></script>
+<script src="../main.js"></script>
 
 <script src="qunit.js"></script>
 
+<script src="unit/editor.js"></script>
+<script src="unit/html-rendering.js"></script>
+<script src="unit/main.js"></script>
+
 <!-- This is for TestSwarm only. -->
 <script src="/js/inject.js"></script>
-
-<script>
-module("mix-master-dialog");
-
-test("setupEditor triggers onChange on init", function() {
-  var wasCalled = false;
-  var textContent = "Monkeys are cool!";
-  var editorObj = jQuery.setupEditor("test-editor-div", textContent, 
-    function onChange(t) {
-      equals(t, textContent, 
-             "onChange must receive initial contents");
-      wasCalled = true;
-    });
-
-  ok(wasCalled, "onChange handler must be triggered");
-  editorObj.destroy();
-});
-
-test("setupEditor initializes default content", function() {
-  var textContent = "Sheep are cool!";
-  var editorObj = jQuery.setupEditor("test-editor-div", textContent,
-                                      function onChange() {
-                                     });
-  equals(editorObj.getText(), textContent);
-  editorObj.destroy();
-});
-
-test("setupUI renders changes in editor to HTML", function () {
-  var rendering = $("#test-rendering");
-  var startHTML = "<p>this is <em>html</em>.</p>";
-  var ui = jQuery.setupUI({
-    rendering: rendering,
-    skeleton: $("#test-skeleton"),
-    defaultHudContent: "boop",
-    defaultEditorContent: startHTML,
-    idToEdit: "test-editor-div"
-  });
-  equals(rendering.html(), startHTML);
-  ui.destroy();
-});
-
-test("setupUI causes HUD to initialize", function () {
-  var rendering = $("#test-rendering");
-  var startHTML = "<p>this is <em>html</em>.</p>";
-  var ui = jQuery.setupUI({
-    rendering: rendering,
-    skeleton: $("#test-skeleton"),
-    defaultHudContent: "boop",
-    defaultEditorContent: startHTML,
-    idToEdit: "test-editor-div"
-  });
-  equals($(".webxray-hud").text(), "boop");
-  
-  ui.destroy();
-});
-
-test("setupUI causes the SVG skeleton element to appear", function () {
-  var rendering = $("#test-rendering");
-  var startHTML = "<p>this is <em>html</em>.</p>";
-  var ui = jQuery.setupUI({
-    rendering: rendering,
-    skeleton: $("#test-skeleton"),
-    defaultHudContent: "boop",
-    defaultEditorContent: startHTML,
-    idToEdit: "test-editor-div"
-  });
-  equals($("#test-skeleton svg").length, 1);
-  
-  ui.destroy();
-});
-
-</script>
 
 <h1 id="qunit-header">Mix Master Dialog Unit Tests</h1>
 <h2 id="qunit-banner"></h2>
