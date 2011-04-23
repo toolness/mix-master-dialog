@@ -14,8 +14,8 @@
         this.hud = null;
         this.editor.destroy();
         this.editor = null;
-
-        options.skeleton.empty();
+        this.skeleton.destroy();
+        this.skeleton = null;
         this.rendering.destroy();
         this.rendering = null;
       }
@@ -31,9 +31,12 @@
       options.defaultEditorContent,
       function onChange(text) {
         ui.rendering.setHTML(text);
-        jQuery.makeSkeleton(
+        // TODO: Why does uncommenting this break things?
+        //if (ui.skeleton)
+        //  ui.skeleton.destroy();
+        ui.skeleton = new jQuery.Skeleton(
           options.skeleton,
-          jQuery.makeProtovisDOMfromDOM(options.rendering, 'div'),
+          options.rendering,
           highlighter
           );
       });

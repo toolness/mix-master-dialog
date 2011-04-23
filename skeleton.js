@@ -1,7 +1,7 @@
 (function (jQuery) {
   var $ = jQuery;
 
-  jQuery.makeProtovisDOMfromDOM = function makeProtovisDOMfromDOM(dom, name) {
+  function makeProtovisDOMfromDOM(dom, name) {
     var pvNode = new pv.Dom.Node();
     pvNode.nodeName = name;
     var childNode;
@@ -22,16 +22,19 @@
     return pvNode;
   }
 
-  jQuery.makeSkeleton = function makeSkeleton(div, dom, highlighter) {
+  jQuery.Skeleton = function Skeleton(targetDiv, domToBeDiagrammed, highlighter) {
+    var self = this;
+    var protovisDom = makeProtovisDOMfromDOM(domToBeDiagrammed, 'div');
+
     var vis = new pv.Panel()
-                    .width(div.width())
-                    .height(div.width())
-                    .canvas(div.get(0));
+                    .width(targetDiv.width())
+                    .height(targetDiv.width())
+                    .canvas(targetDiv.get(0));
   
     var spacing = 16;
   
     var tree = vis.add(pv.Layout.Indent)
-        .nodes(dom.nodes())
+        .nodes(protovisDom.nodes())
         .depth(spacing * 2)
         .breadth(spacing * 2);
 
@@ -60,5 +63,10 @@
         .text(function(d) { return d.nodeName; });
 
     vis.render();
+    
+    self.destroy = function() {
+      // TODO: Do we need to do anything with Protovis here?
+      targetDiv.empty();
+    };
   }
 })(jQuery);
